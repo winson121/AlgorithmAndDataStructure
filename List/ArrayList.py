@@ -1,4 +1,5 @@
 from referential_array import build_array
+from Sort.DivideAndConquer.QuickSort import quickSort as QuickSort
 
 class ArrayList:
     def __init__(self, maxCapacity=10):
@@ -84,11 +85,9 @@ class ArrayList:
             raise IndexError
         for i in range(index, len(self)-1):
             self.array[i] = self.array[i+1]
-
+    
+    def sort(self):
+        assert not self._isempty(), "List is empty"
+        QuickSort(self.array)
 if __name__=="__main__":
     a = ArrayList()
-    a[0] = 5
-    a[1] = 4
-    print(a[0],a[1])
-    a.swap(a[0],a[1])
-    print(a[0],a[1])
