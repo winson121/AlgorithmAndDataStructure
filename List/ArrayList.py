@@ -1,7 +1,4 @@
-import sys
-sys.path.append("..")
 from referential_array import build_array
-from Sort.DivideAndConquer.QuickSort import quickSort as QuickSort
 
 class ArrayList:
     """Implementation of Array based List Data Structure
@@ -28,7 +25,7 @@ class ArrayList:
         sort(reverse=False) -- use a stable sort on the ArrayList
     """
 
-    def __init__(self, maxCapacity=10):
+    def __init__(self, maxCapacity=50):
         """
         Keyword Arguments:
             maxCapacity {int} -- size of array (default: {10})
@@ -36,6 +33,25 @@ class ArrayList:
         self.array = build_array(maxCapacity)
         self._count = 0
     
+    def __str__(self):
+        """
+        overloading the built in print function to print each item in the list in a line then print a newline
+        :precondition: none
+        :postcondition: none
+        :return: string contains every element in the list printed in 1 line for each element
+        :complexity:
+            @BestCase: O(N), it will always iterating through the element in the list one time
+            @WorstCase: O(N), same as BestCase, it just itearating through the list and concatenate every element
+        """
+        string = ""
+        for i in range(len(self)):
+            if i < self._count-1:
+                string += str(self[i])
+                string += "\n"
+            else:
+                string += str(self[i])
+        return string
+
     def __len__(self):
         """return the number of element in the ArrayList
         
@@ -73,8 +89,7 @@ class ArrayList:
         Complexity:
             BestCase {O(1)} -- if the item is at the first element in the List
             WorstCase {O(N)} -- if the item is at the end of the list or doesn't exist
-        """
-        assert not self._isempty(); "list must not be empty"          
+        """    
         for i in range(len(self)):
             if self.array[i] == item:
                 return True
@@ -97,9 +112,9 @@ class ArrayList:
             WorstCase {O(1)} -- same as best case
         """
         if self._validIndex(index):
-            return self.array[index]
+            return self.array[self._correctIndex(index)]
         else:
-            raise IndexError("list index out of range")
+            raise IndexError
 
     def __setitem__(self, index, item):
         """set the contain of ArrayList at position index to item
@@ -115,8 +130,8 @@ class ArrayList:
             BestCase {O(1)} -- take constant time to access the array
             WorstCase {O(1)} -- same as BestCase
         """
-        if _validIndex(index)
-            self.array[index] = item 
+        if self._validIndex(index):
+            self.array[self._correctIndex(index)] = item 
         else:
             raise IndexError("list index out of range") 
     
@@ -133,14 +148,18 @@ class ArrayList:
             BestCase {O(1)} -- if the first element is not the same or other not a List or ArrayList
             WorstCase {O(N}) -- if the List is Equal
         """
-        if not isinstance(self, other):
-            return False
+        stat = True
+        if not isinstance(other, (ArrayList, list)):
+            stat = False
+        elif len(other) != len(self):
+            stat = False
+        else:
+            for i in range(len(other)):
+                if self.array[i] != other[i]:
+                    stat = False
+                    break
         
-        for i in range(len(self)):
-            if self.array[i] != other[i]:
-                return False
-        
-        return True
+        return stat
         
     def append(self, item):
         """append item at the end of the ArrayList if its not full already
@@ -152,7 +171,8 @@ class ArrayList:
             BestCase {O(1)} -- accessing the Last Index of the List takes Constant time
             WorstCase {O(1)} -- same as BestCase
         """
-        assert not self._isfull(); "Array is full"
+        if self._isfull():
+            raise Exception("array is full")
         self.array[self._count] = item
         self._count += 1
         
@@ -170,10 +190,13 @@ class ArrayList:
             BestCase {O(1)} -- when the insert operation is at the end of the List
             WorstCase {O(N)} -- when the item inserted at the start of the List
         """
-        assert not self._isfull(), "array is full"
-        if _validIndex(index):
-            self._shiftArrayRight(index)
-            self.array[index] = item
+        if self._isfull():
+            raise Exception( "array is full")
+
+        if self._validIndex(index):
+            listIndex = self._correctIndex(index)
+            self._shiftArrayRight(listIndex)
+            self.array[listIndex] = item
             self._count += 1
         else:
             raise IndexError
@@ -189,10 +212,15 @@ class ArrayList:
             BestCase {O(1)} -- if the frst occurences of item is at the end of the List
             WorstCase {O(N)} -- if the first occurences is at the start of the List 
         """
-        assert not self._isempty(), "array is empty"
+        if self._isempty():
+            raise IndexError("array is empty")
+        
         for i in range(len(self)):
             if self.array[i] == item:
                 self.delete(i)
+                return
+
+        raise ValueError("item not in the list")
 
     def delete(self, index):
         """remove the first occurence of item found in the list
@@ -207,8 +235,8 @@ class ArrayList:
             BestCase {O(1)} -- if index == len(self)-1
             WorstCase {O(N)} -- if index is at the start of the List
         """
-        if _validIndex(index):
-            self._shiftArrayLeft(index)
+        if self._validIndex(index):
+            self._shiftArrayLeft(self._correctIndex(index))
             self._count -= 1
         else:
             raise IndexError
@@ -253,8 +281,22 @@ class ArrayList:
             [bool] -- return True if positive or negative index not exceeds the number of item 
                       in the List
         """
-        return (index >=0 and index < len(self) or (index <= -len(self) and index < 0)
+        return (0 <= index < len(self)) or (-(len(self)) <= index < 0)
 
+    def _correctIndex(self, index):
+        """this function return correct index to the list.
+        invoked if _validIndex(self, index) is true
+        
+        Arguments:
+            index {int} -- the queried index
+        
+        Returns:
+            [int] -- index of the ArrayList
+        """
+        if index < 0:
+            return self._count + index
+        else:
+            return index
     def sort(self, reverse=False):
         """use a stable sort on the ArrayList
 
@@ -271,12 +313,40 @@ class ArrayList:
             WorstCase {O(N^2)} -- if the pivot chosen always nearly divide the partition the List
                                   to a list with one element and a list with n-1 elements
         """
-        assert not self._isempty(), "List is empty"
+        if self._isempty():
+            return 
         if not reverse:
-            QuickSort(self.array)
+            self._quickSort()
         elif reverse:
             for i in range(len(self)):
                 self.array[i] = -self.array[i]
-            QuickSort(self.array)
+            self._quickSort()
             for i in range(len(self)):
                 self.array[i] = -self.array[i]
+
+    def _quickSort(self):
+        start = 0
+        end = len(self)-1
+        self._quickSortAux(start,end)
+    
+    def _quickSortAux(self, start, end):
+        # keep partition the list while splitted list contains more than one element
+        if start < end:
+            # partition the list and get the boundary of partition
+            boundary = self._partition(start, end)
+            self._quickSortAux(start, boundary-1)
+            self._quickSortAux(boundary+1, end)
+    
+    def _partition(self, start, end):
+        mid = (start + end) // 2
+        pivot = self.array[mid]
+        self.array[start], self.array[mid] = self.array[mid], self.array[start]
+        index = start
+
+        for i in range(start+1, end+1):
+            if self.array[i] < pivot:
+                index += 1
+                self.array[index], self.array[i] = self.array[i], self.array[index]
+
+        self.array[start], self.array[index] = self.array[index], self.array[start]
+        return index
