@@ -5,7 +5,7 @@ import random
 class Test_ArrayList(unittest.TestCase):
 
     def generateLists(self, size, inputNone=False):
-        arrayList = ArrayList()
+        arrayList = ArrayList(size)
         list = []
         for _ in range(size):
             item = None
@@ -63,12 +63,14 @@ class Test_ArrayList(unittest.TestCase):
 
     def testAppend(self):
         arrayList = self.generateLists(50)[0]
-        self.assertRaises(Exception, arrayList.append, 10)
+        arrayLen = len(arrayList.array)
+        arrayList.append(2)
+        self.assertEqual(2 * arrayLen, len(arrayList.array), msg="length of array double the size of original array")
     
     def testInsert(self):
         arraylist = self.generateLists(49)[0]
         self.assertIsNone(arraylist.insert(0,2), msg= print("insert success! length of the list is:",len(arraylist)))
-        self.assertRaises(Exception, arraylist.insert, 2, 3)
+        self.assertRaises(IndexError, arraylist.insert, 50, 2)
     
     def testRemove(self):
         arraylist = self.generateLists(3)[0]
@@ -77,7 +79,7 @@ class Test_ArrayList(unittest.TestCase):
         self.assertRaises(ValueError, arraylist.remove, 150)
     
     def testDelete(self):
-        for i in range(50):
+        for i in range(1000):
             arrayList = self.generateLists(i)[0]
             for j in range(i):
                 arrayList.delete(0)

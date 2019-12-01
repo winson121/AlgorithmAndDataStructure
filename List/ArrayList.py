@@ -15,6 +15,7 @@ class ArrayList:
         __getitem__(index) -- get the item at position index from ArrayList
         __setitem__(index, item) -- set the contain of ArrayList at position index to item
         __eq__(other) -- check if the ArrayList is equal to the other list
+        _resize(size) -- resize the ArrayList by copying the item of the array to new ArrayList object
         append(item) -- append item at the end of the ArrayList if its not full already
         insert(index, item) -- insert item to ArrayList at position before index
         remove(item) -- remove the first occurence of item found in the list
@@ -25,11 +26,13 @@ class ArrayList:
         sort(reverse=False) -- use a stable sort on the ArrayList
     """
 
-    def __init__(self, maxCapacity=50):
+    def __init__(self, maxCapacity=20):
         """
         Keyword Arguments:
-            maxCapacity {int} -- size of array (default: {10})
+            maxCapacity {int} -- size of array, must not less than 20 (default: {20})
         """
+        if maxCapacity < 20:
+            maxCapacity = 20
         self.array = build_array(maxCapacity)
         self._count = 0
     
@@ -160,9 +163,26 @@ class ArrayList:
                     break
         
         return stat
+    
+    def _resize(self, size):
+        """resize the ArrayList by copying the item of the array to new ArrayList object
         
+        Arguments:
+            size {int} -- the size of new array of ArrayList
+        """
+        # store the content of old array to temporary array
+        tmpCount = self._count
+        tmpArray = self.array
+        # initialize new array
+        self.__init__(size)
+        self._count = tmpCount
+        # copy back the content of temporary array to the new array
+        for i in range(tmpCount):
+            self.array[i] = tmpArray[i]
+            
     def append(self, item):
-        """append item at the end of the ArrayList if its not full already
+        """append item at the end of the ArrayList.
+        if the ArrayList is full, resize the ArrayList to double of current size
         
         Arguments:
             item {python object} -- item that you want to append on the List
@@ -172,26 +192,25 @@ class ArrayList:
             WorstCase {O(1)} -- same as BestCase
         """
         if self._isfull():
-            raise Exception("array is full")
+            self._resize(2*len(self))
+            
         self.array[self._count] = item
         self._count += 1
         
     def insert(self, index, item):
         """insert item to ArrayList at position before index
+        resize the ArrayList to double the current array size
         
         Arguments:
             index {int} -- index of the array that we want to insert the item before
             item {python object} -- the item that we want to insert to the List
-        
-        Raises:
-            IndexError: raised if the index is out of range
         
         Complexity:
             BestCase {O(1)} -- when the insert operation is at the end of the List
             WorstCase {O(N)} -- when the item inserted at the start of the List
         """
         if self._isfull():
-            raise Exception( "array is full")
+            self._resize(2*len(self))
 
         if self._validIndex(index):
             listIndex = self._correctIndex(index)
@@ -224,6 +243,9 @@ class ArrayList:
 
     def delete(self, index):
         """remove the first occurence of item found in the list
+        if the #item < (len(self.array) // 8),
+        resize the ArrayList to half of its original size
+        if len(self.array) // 8 < 20, the array should be resize to 20
         
         Arguments:
             index {int} -- index of the item in the array that we want to delete
@@ -240,6 +262,11 @@ class ArrayList:
             self._count -= 1
         else:
             raise IndexError
+        
+        if len(self) < (len(self.array) // 8):
+            tmpSize= len(self.array) // 2 
+            newSize = 20 if tmpSize < 20 else tmpSize
+            self._resize(newSize)
 
     def _shiftArrayRight(self, index):
         """shift subarray from [index..len(self)] to the right by one step
@@ -350,3 +377,4 @@ class ArrayList:
 
         self.array[start], self.array[index] = self.array[index], self.array[start]
         return index
+
