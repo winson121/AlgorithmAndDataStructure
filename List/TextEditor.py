@@ -64,10 +64,10 @@ class TextEditor(object):
         file.close()
     
     def delete(self, line):
-        if len(self._list) == 1:
-            raise IndexError("Can't delete anymore")
         if line:
             self._list.delete(int(line))
+            if self._list._isempty():
+                self._list.append("")
         else:
             self.__init__()
     
