@@ -6,23 +6,36 @@ class TextEditor(object):
         self._list = ArrayList()
         self._list.append("")
 
-    def _listToString(self, strList):
-        string = ""
-        for i in range(len(strList)):
-            string += strList[i]
-        return string
+    # def _listToString(self, strList):
+    #     string = ""
+    #     for i in range(len(strList)):
+    #         string += strList[i]
+    #     return string
 
-    def insert(self, lineIndex, strList):
-        lineIndex = int(lineIndex)
-        string = self._listToString(strList)
-        self._list.insert(lineIndex, string)
+    def insert(self, index):
+        print("Ctrl+C to exit insert")
+        line = self._validLine(int(index)) 
+        while True:
+            try:
+                string = input()
+                self._list.insert(line, string)
+                line += 1
+            except KeyboardInterrupt:
+                break
+            except:
+                pass
+
+    # def insert(self, lineIndex, strList):
+    #     lineIndex = int(lineIndex)
+    #     string = self._listToString(strList)
+    #     self._list.insert(lineIndex, string)
     
     def read(self, file):
         self._list = readFile(file)
         if len(self._list) == 0:
             self._list.append("")
     
-    def _validPrintLine(self, index):
+    def _validLine(self, index):
         if not self._list._validIndex(index):
             raise IndexError("Index is out of range")
         line = index
@@ -33,8 +46,8 @@ class TextEditor(object):
     def print(self, num1=False, num2=False):
         if num1 and num2:
             num1, num2 = int(num1), int(num2)
-            validNum1 = self._validPrintLine(num1)
-            validNum2 = self._validPrintLine(num2)
+            validNum1 = self._validLine(num1)
+            validNum2 = self._validLine(num2)
             if not(validNum1 < validNum2):
                 raise IndexError("Index is out of range")
             for i in range(num1, num2+1):
