@@ -324,6 +324,7 @@ class ArrayList:
             return self._count + index
         else:
             return index
+            
     def sort(self, reverse=False):
         """use a stable sort on the ArrayList
 
@@ -378,3 +379,5 @@ class ArrayList:
         self.array[start], self.array[index] = self.array[index], self.array[start]
         return index
 
+if __name__ == "__main__":
+    b = ArrayList()

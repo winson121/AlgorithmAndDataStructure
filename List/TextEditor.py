@@ -242,6 +242,7 @@ class TextEditor(object):
     
     def main(self):
         """function to run the text editor application"""
+        print("Welcome to my text editor!\nthis text editor can only edit .txt file")
         while True:
             print(">>",end="")
             option = input()
