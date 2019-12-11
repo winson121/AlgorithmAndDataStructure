@@ -31,9 +31,14 @@ def mergeArray(array, temp, start, mid, end):
             left += 1
         # if current element from the right subarray bigger than left subarray
         # append left subarray to temp 
-        elif array[left] < array[right]:
+        elif array[left] <= array[right]:
             temp[i] = array[left]
             left += 1
         else:
             temp[i] = array[right]
             right += 1
+
+if __name__ == "__main__":
+    beta = [2,4,1,8,6,0,-1,9,6,5,8]
+    mergeSort(beta)
+    print(beta)

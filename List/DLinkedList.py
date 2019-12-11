@@ -9,6 +9,7 @@ class Node:
         return string
 
 class ListIterator:
+    '''Iterator for the DLinkedList'''
     def __init__(self, head):
         self.current = head
     
@@ -24,6 +25,28 @@ class ListIterator:
             raise StopIteration
 
 class DLinkedList:
+    """Implementation of Doubly Linked List Data Structure
+
+    Attributes:
+        _head {array} -- a pointer to the DLinkedList Nodes
+        _count {int} -- number of nodes in the DLinkedList
+    
+    Methods:
+        __len__() -- return the number of Nodes in the DLinkedList
+        __str()__ -- overloading the built in print function to print each item in the linked list in a single line seperated by newline
+        __contains__(item) -- check if item is in the DLinkedList
+        __getitem__(index) -- get the item from DLinkedList at position index
+        __setitem__(index, item) -- set the item in Node at position index to the item in param
+        __eq__(other) -- check if the DLinkedList is equal to the other list
+        append(item) -- append item at the end of the DLinkedList.
+                        item will be appended from the tail of the list
+        prepend(item) -- prepend item at the front of the DLinkedList.
+                         item will be prepended from the head of the list
+        insert(index, item) -- insert item to the DlinkedList at position before index
+        remove(item) -- find item in the DLinkedList and delete the first node containing the item from the List.
+        delete(index) -- delete node at position index in the DLinkedList.
+        sort(reverse=False) -- 
+    """
     def __init__(self):
         self._head = None
         self._tail = None
@@ -33,6 +56,7 @@ class DLinkedList:
         return ListIterator(self._head)
 
     def __len__(self):
+        '''return the number of Nodes in the DLinkedList'''
         return self._count
     
     def __str__(self):
@@ -140,6 +164,93 @@ class DLinkedList:
         
         self._count += 1
 
+    def prepend(self, item):
+        """prepend item at the front of the DLinkedList.
+        item will be prepended from the head of the list
+        
+        Arguments:
+            item {python object} -- item to prepend to the list
+        """
+        try:
+            new = Node(item, self._head)
+            self._head.prev = new
+            self._head = new
+        except:
+            self._head = self._tail = Node(item)
+        
+        self._count += 1
+
+    def insert(self, index, item):
+        """insert item to the DLinkedList at position before index
+        
+        Arguments:
+            index {int} -- positive or negative integer
+            item {python object} -- item to be inserted to the list before index
+        
+        Raises:
+            IndexError: raised if not a valid index
+        """
+        try:
+            node = self._getNode(index)
+            new = Node(item, node, node.prev)
+            node.prev.next = new
+            node.prev = new
+        except IndexError:
+            raise IndexError
+        except AttributeError:
+            new = Node(item, self._head)
+            self._head.prev = new
+            self._head = new
+
+        self._count += 1
+
+    def _removeNode(self, node):
+        """remove the link of the selected node from the DLinkedList
+        
+        Arguments:
+            node {Node} -- node that we want to remove from the list
+        """
+        try:
+            #general case when node deleted is not 
+            node.next.prev = node.prev
+            node.prev.next = node.next
+        except:
+            # delete item when only one node exist
+            if self._head == self._tail:
+                self._tail = self._head = None
+            # if deleted node is head, reset head 
+            elif node.prev is None:
+                self._head = node.next
+                self._head.prev = None
+            # if deleted item is tail, reset tail
+            elif node.next is None:
+                self._tail = node.prev
+                self._tail.next = None
+        self._count -= 1
+
+    def delete(self, index):
+        """delete node at position index in the DLinkedList.
+
+        Arguments:
+            index {int} -- index position of item to be deleted
+        """
+        node = self._getNode(index)
+        self._removeNode(node)
+
+    def remove(self, item):
+        """find item in the DLinkedList and delete the first node containing the item from the List.
+        
+        Arguments:
+            item {python object} -- item that we want to search in the DLinkedList
+        """
+        node = self._head
+        for _ in range(len(self)):
+            if node.item == item:
+                self._removeNode(node)
+                break
+            node = node.next
+        
+            
     def _isEmpty(self):
         return len(self) == 0
 
@@ -192,7 +303,7 @@ class DLinkedList:
         Returns:
             [Node] -- return node at position index in linked list
         """
-        if not self._validIndex:
+        if not self._validIndex(index):
             raise IndexError
         elif index >= 0:
             return self._getNodePos(index)
@@ -200,8 +311,6 @@ class DLinkedList:
             return self._getNodeNeg(index)
 
     def _validIndex(self, index):
+        '''restrict the Index range so that it behave similar to python List Indexing'''
         return (0 <= index < len(self)) or (-len(self) <= index < 0)
-    
-if __name__ == "__main__":
-    a = DLinkedList()
-    
+        
