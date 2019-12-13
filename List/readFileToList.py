@@ -16,7 +16,3 @@ def readFile(filename):
         row = line.rstrip("\n")
         array.append(row)
     return array
-
-if __name__ == "__main__":
-    a = readFile("test.txt")
-    print(a)

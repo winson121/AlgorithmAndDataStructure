@@ -9,20 +9,14 @@ class ArrayList:
     
     Methods:
         __len__() -- return the number of element in the ArrayList
-        _isempty() -- check if the ArrayList is empty
-        _isfull() -- check if the ArrayList is full
         __contains__(item) -- check if the item is in the ArrayList
         __getitem__(index) -- get the item at position index from ArrayList
         __setitem__(index, item) -- set the contain of ArrayList at position index to item
         __eq__(other) -- check if the ArrayList is equal to the other list
-        _resize(size) -- resize the ArrayList by copying the item of the array to new ArrayList object
         append(item) -- append item at the end of the ArrayList if its not full already
         insert(index, item) -- insert item to ArrayList at position before index
         remove(item) -- remove the first occurence of item found in the list
         delete(index) -- remove item from the list at position index
-        _shiftArrayRight(index) -- shift subarray from [index..len(self)] to the right by one step
-        _shiftArrayLeft(index) -- shift subarray from[index..len(self)] to the left by one step
-        _validIndex(index) -- restrict the Index range so that it behave similar to python List Indexing
         sort(reverse=False) -- use a stable sort on the ArrayList
     """
 

@@ -204,30 +204,6 @@ class DLinkedList:
 
         self._count += 1
 
-    def _removeNode(self, node):
-        """remove the link of the selected node from the DLinkedList
-        
-        Arguments:
-            node {Node} -- node that we want to remove from the list
-        """
-        try:
-            #general case when node deleted is not 
-            node.next.prev = node.prev
-            node.prev.next = node.next
-        except:
-            # delete item when only one node exist
-            if self._head == self._tail:
-                self._tail = self._head = None
-            # if deleted node is head, reset head 
-            elif node.prev is None:
-                self._head = node.next
-                self._head.prev = None
-            # if deleted item is tail, reset tail
-            elif node.next is None:
-                self._tail = node.prev
-                self._tail.next = None
-        self._count -= 1
-
     def delete(self, index):
         """delete node at position index in the DLinkedList.
 
@@ -250,7 +226,11 @@ class DLinkedList:
                 break
             node = node.next
         
-            
+    def pop(self):
+        item = self[-1]
+        self.delete(-1)
+        return item
+
     def _isempty(self):
         return len(self) == 0
 
@@ -313,6 +293,30 @@ class DLinkedList:
     def _validIndex(self, index):
         '''restrict the Index range so that it behave similar to python List Indexing'''
         return (0 <= index < len(self)) or (-len(self) <= index < 0)
+
+    def _removeNode(self, node):
+        """remove the link of the selected node from the DLinkedList
+        
+        Arguments:
+            node {Node} -- node that we want to remove from the list
+        """
+        try:
+            #general case when node deleted is not 
+            node.next.prev = node.prev
+            node.prev.next = node.next
+        except:
+            # delete item when only one node exist
+            if self._head == self._tail:
+                self._tail = self._head = None
+            # if deleted node is head, reset head 
+            elif node.prev is None:
+                self._head = node.next
+                self._head.prev = None
+            # if deleted item is tail, reset tail
+            elif node.next is None:
+                self._tail = node.prev
+                self._tail.next = None
+        self._count -= 1
 
     def sort(self, reverse=False):
         """sort the DLinkedList in ascending order by default
