@@ -343,39 +343,36 @@ class ArrayList:
         """
         if self._isempty():
             return 
-        if not reverse:
-            self._quickSort()
-        elif reverse:
-            for i in range(len(self)):
-                self.array[i] = -self.array[i]
-            self._quickSort()
-            for i in range(len(self)):
-                self.array[i] = -self.array[i]
+        self._quickSort(reverse)
 
-    def _quickSort(self):
+    def _quickSort(self, reverse):
         start = 0
         end = len(self)-1
-        self._quickSortAux(start,end)
+        self._quickSortAux(start,end, reverse)
     
-    def _quickSortAux(self, start, end):
+    def _quickSortAux(self, start, end, reverse):
         # keep partition the list while splitted list contains more than one element
         if start < end:
             # partition the list and get the boundary of partition
-            boundary = self._partition(start, end)
-            self._quickSortAux(start, boundary-1)
-            self._quickSortAux(boundary+1, end)
+            boundary = self._partition(start, end, reverse)
+            self._quickSortAux(start, boundary-1, reverse)
+            self._quickSortAux(boundary+1, end, reverse)
     
-    def _partition(self, start, end):
+    def _partition(self, start, end, reverse):
         mid = (start + end) // 2
         pivot = self.array[mid]
         self.array[start], self.array[mid] = self.array[mid], self.array[start]
         index = start
 
         for i in range(start+1, end+1):
-            if self.array[i] < pivot:
-                index += 1
-                self.array[index], self.array[i] = self.array[i], self.array[index]
-
+            if not reverse:
+                if self.array[i] < pivot:
+                    index += 1
+                    self.array[index], self.array[i] = self.array[i], self.array[index]
+            else:
+                if self.array[i] > pivot:
+                    index += 1
+                    self.array[index], self.array[i] = self.array[i], self.array[index]
         self.array[start], self.array[index] = self.array[index], self.array[start]
         return index
 

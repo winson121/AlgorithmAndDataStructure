@@ -1,16 +1,17 @@
-from ArrayList import ArrayList
+# from ArrayList import ArrayList
+from DLinkedList import DLinkedList
 from readFileToList import readFile
 
 class TextEditor(object):
     """text editor from FIT1008Sem2_2017 assigment 2 Task4.
 
     Attributes:
-        _list {ArrayList} -- a list of buffer for the txt file
+        _list {List} -- a list of buffer for the txt file
     
     Methods:
         insert(index) -- keep inserting string line by line until KeyboardInterrupt is pressed.
 
-        read(file) -- read a txt file line by line and append it to ArrayList buffer.
+        read(file) -- read a txt file line by line and append it to List buffer.
         
         print(num1="", num2="") -- print the string at line num1 if only provided num1.
                                    if num1 and num2 is provided, it will print the string from num1
@@ -32,9 +33,9 @@ class TextEditor(object):
                      if no parameter passed to the comand, it will return man page instead.
     """
     def __init__(self):
-        """create a new ArrayList as a buffer for txt file
+        """create a new List as a buffer for txt file
         and append empty string so that we can insert to the empty text"""
-        self._list = ArrayList()
+        self._list = DLinkedList()
         self._commandDict = {
             "insert": self.insert,
             "read"  : self.read,
@@ -71,7 +72,7 @@ class TextEditor(object):
                 pass
 
     def read(self, file):
-        """read a txt file line by line and append it to ArrayList buffer.
+        """read a txt file line by line and append it to List buffer.
         
         Arguments:
             file {str} -- path to txt document to be read
@@ -167,7 +168,7 @@ class TextEditor(object):
         """
         lowCase = word.lower()
         lowCaseTxt = self._lowerCase()
-        occurences = ArrayList()
+        occurences = DLinkedList()
         for i in range(len(lowCaseTxt)):
             if lowCase in lowCaseTxt[i]:
                 occurences.append(i)
@@ -179,9 +180,9 @@ class TextEditor(object):
         called by self.search() for word comparison
 
         Returns:
-            [ArrayList] -- list containin the lowercase copy of txt string
+            [List] -- list containin the lowercase copy of txt string
         """
-        lower = ArrayList()
+        lower = DLinkedList()
         for item in self._list:
             lower.append(item.lower())
         

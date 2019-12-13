@@ -45,7 +45,7 @@ class DLinkedList:
         insert(index, item) -- insert item to the DlinkedList at position before index
         remove(item) -- find item in the DLinkedList and delete the first node containing the item from the List.
         delete(index) -- delete node at position index in the DLinkedList.
-        sort(reverse=False) -- 
+        sort(reverse=False) -- sort the DLinkedList in ascending order by default
     """
     def __init__(self):
         self._head = None
@@ -251,7 +251,7 @@ class DLinkedList:
             node = node.next
         
             
-    def _isEmpty(self):
+    def _isempty(self):
         return len(self) == 0
 
     def _getNodeNeg(self, index):
@@ -313,4 +313,80 @@ class DLinkedList:
     def _validIndex(self, index):
         '''restrict the Index range so that it behave similar to python List Indexing'''
         return (0 <= index < len(self)) or (-len(self) <= index < 0)
+
+    def sort(self, reverse=False):
+        """sort the DLinkedList in ascending order by default
         
+        Keyword Arguments:
+            reverse {bool} -- if reverse is True, sort by descending order (default: {False})
+        """
+        self._mergeSort(reverse)
+
+    def _mergeSort(self, reverse):
+        start = 0
+        end = len(self)-1
+        head = self._head
+        self._head = self._mergeSortAux(head, start, end, reverse)
+    
+    def _mergeSortAux(self, head, start, end, reverse):
+        # if list is empty or only one element in the list, it is sorted
+        if head is None or head.next is None:
+            return head
+        mid = (start+end)//2
+        # split the DLinkedList into 2 half
+        middleNode = self._getMiddle(head, start, mid)
+        secondHalf = middleNode.next
+        # remove the links between the splitted LinkedList
+        middleNode.next.prev = None
+        middleNode.next = None
+        # keep splitting the sublist into two half
+        left = self._mergeSortAux(head, start, mid, reverse)
+        right = self._mergeSortAux(secondHalf, mid+1, end, reverse)
+        # sort and merge the two sublist
+        return self._mergeArray(left, right, reverse)
+    
+    def _getMiddle(self, head, start, end):
+        '''function to get the middle node of the linkedlist'''
+        middle = head
+        counter = end-start
+        while counter:
+            middle = middle.next
+            counter -= 1
+        return middle
+
+    def _mergeArray(self, left, right, reverse):
+        # set tail to the end of either left or right since we don't know which one reaches the end first
+        if left is None:
+            # reaches the end of the left sublist and set the end as tail
+            self._tail = right
+            return right
+        if right is None:
+            # reaches the end of the right sublist and set the end as tail
+            self._tail = left
+            return left
+
+        node = None
+        if not reverse:
+            if left.item <= right.item:
+                node = left
+                node.next = self._mergeArray(node.next, right, reverse)
+                # set the prev link of next node to current node after we get the next node
+                node.next.prev = node
+            else:
+                node = right
+                node.next = self._mergeArray(left, node.next, reverse)
+                node.next.prev = node
+        else:
+            if left.item > right.item:
+                node = left
+                node.next = self._mergeArray(node.next, right, reverse)
+                # set the prev link of next node to current node after we get the next node
+                node.next.prev = node
+            else:
+                node = right
+                node.next = self._mergeArray(left, node.next, reverse)
+                node.next.prev = node
+        return node
+
+if __name__ == "__main__":
+    alpha = DLinkedList()
