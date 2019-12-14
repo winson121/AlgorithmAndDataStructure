@@ -1,4 +1,4 @@
-from ArrayList import ArrayList
+from DLinkedList import DLinkedList
 def readFile(filename):
     """function to read file and append each line to ArrayList
     
@@ -6,12 +6,12 @@ def readFile(filename):
         filename {string} -- name of the path to the file
     
     Returns:
-        [ArrayList] -- List containing each line of the file
+        [DLinkedList] -- List containing each line of the file
     """
     infile = open(filename, 'r')
     contents = infile.readlines()
     infile.close()
-    array = ArrayList()
+    array = DLinkedList()
     for line in contents:
         row = line.rstrip("\n")
         array.append(row)

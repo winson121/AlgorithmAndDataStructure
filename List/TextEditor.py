@@ -1,5 +1,6 @@
 # from ArrayList import ArrayList
 from DLinkedList import DLinkedList
+from Stack import Stack
 from readFileToList import readFile
 
 class TextEditor(object):
@@ -36,21 +37,28 @@ class TextEditor(object):
         """create a new List as a buffer for txt file
         and append empty string so that we can insert to the empty text"""
         self._list = DLinkedList()
+        self._list.append("")
+        self._undoable = ("read", "delete", "insert")
+        self._undoList = Stack()
         self._commandDict = {
             "insert": self.insert,
             "read"  : self.read,
             "write" : self.write,
             "print" : self.print,
             "delete": self.delete,
-            "search": self.search,            
+            "search": self.search,
+            "undo"  : self.undo,            
             "quit"  : self.quit,
             "man"   : self.man,
             "help" : self.help
         }
-        self._list.append("")
-
+        self._undoDict = {
+            "read"  : self.delete
+        }
+        
     def insert(self, index):
-        """keep inserting string line by line until KeyboardInterrupt is pressed.
+        """
+        keep inserting string line by line until KeyboardInterrupt is pressed.
 
         
         Arguments:
@@ -59,28 +67,41 @@ class TextEditor(object):
                            to integer 
         """
         print("Ctrl+C to exit insert")
-        line = self._validLine(index) 
+        start = self._validLine(index) 
+        end = start
         while True:
             try:
                 string = input()
-                self._list.insert(line, string)
+                self._list.insert(end, string)
                 # increment the line to keep the insert in order
-                line += 1
+                end += 1
             except KeyboardInterrupt:
+                insertArg = self._undoList.pop()
+                insertArg.append(start)
+                insertArg.append(end)
+                self._undoList.push(insertArg)
                 break
-            except:
-                pass
 
     def read(self, file):
         """read a txt file line by line and append it to List buffer.
-        
+        the contain currently in the list will be saved to stack for
+        undo action
+
         Arguments:
             file {str} -- path to txt document to be read
         """
+        self._saveState()
         self._list = readFile(file)
-        if len(self._list) == 0:
-            self._list.append("")
     
+    def _saveState(self):
+        """save current self._list and self._undoList to stack before overwriting
+        self._list with content of txt file and resetting the self._undoList.
+        used for when we want to undo reading and going back to the state before we read the new txt file
+        """
+        topStack = self._undoList.pop()
+        topStack.append(self._list)
+        self._undoList.push(topStack)
+
     def _validLine(self, index):
         """
         check whether the line argument is within the list index.
@@ -133,7 +154,8 @@ class TextEditor(object):
             print(self._list)
     
     def write(self, filename):
-        """write the buffer string from the list to a file with name == filename.
+        """
+        write the buffer string from the list to a file with name == filename.
         
         Arguments:
             filename {str} -- the path to the file. new file created
@@ -148,17 +170,29 @@ class TextEditor(object):
         delete the string at position line in txt file.
         if the list is empty, it will append empty string
         to enable insertion of new string.
+        the deleted line/s will be saved to stack for undo action.
 
         Arguments:
             line {str} -- string of line number that can be casted to integer
         """
-        if line:
+        if line is not None:
             line = self._validLine(line)
+            # save the line to be deleted to stack
+            # topAction = self._undoList.pop()
+            # topAction.append(line)
+            # topAction.append(self._list[line])
+            # self._undoList.push(topAction)
+            # delete the line in the list
             self._list.delete(line)
             if self._list._isempty():
                 self._list.append("")
         else:
+            # save the entire list to stack when we reset the editor
+            # self._saveState()
+            # save undo action list and restore it after reset
+            # tmpStack = self._undoList
             self.__init__()
+            # self._undoList = tmpStack
     
     def search(self, word):
         """search word and print the line numbers that contain the word.
@@ -188,16 +222,57 @@ class TextEditor(object):
         
         return lower
     
+    def undo(self, arg=None):
+        undoAction = list(self._undoList.pop())
+        if undoAction[0] == "read":
+            self._undoReset(undoAction[1])
+        elif undoAction[0] == "insert":
+            self._undoInsert(undoAction[1:])
+        # elif undoAction[0] == "delete":
+        #     self._undoDelete(undoAction[1:])
+    
+    # def _undoDelete(self, arg):
+    #     if len(arg) == 1:
+    #         self._undoReset(arg)
+    #     elif len(arg) == 2:
+    #         if arg[-1] == "" and arg[0] >= len(self._list):
+    #             return
+    #         # self._list.insert(*arg)
+
+    def _undoInsert(self, arg):
+        """undo the insert operation to the _list
+        
+        Arguments:
+            arg {List} -- list containing the starting and ending line of insertion 
+        """
+        start, end = arg
+        for _ in range(start, end):
+            self.delete(start)
+
+    def _undoReset(self, arg):
+        """reset the _list and restore the contents of _list with the value
+        of _list before we read the txt file or delete the previous _list
+        
+        Arguments:
+            arg {List} -- List containing the previous content before we overwrite it
+        """
+        tmpStack = self._undoList
+        self.delete(None)
+        self._list = arg
+        self._undoList = tmpStack
+
     def quit(self, arg):
-        """called when we want to exit the text editor.
+        """
+        called when we want to exit the text editor.
         
         Arguments:
             arg {None} -- dummy argument which is not used
         """
-        exit()
+        raise SystemExit
 
     def man(self, arg):
-        """show the available commands of the text editor.
+        """
+        show the available commands of the text editor.
         
         Arguments:
             arg {None} -- dummy argument
@@ -226,10 +301,20 @@ class TextEditor(object):
             command {str} -- key of the text editor command
             args {str} -- parameters of the command from stdin
         
+        Raises:
+            Exception: raised when number of arguments is invalid to the called function
+
         Returns:
             [function] -- function call to the method refer by command and pass the arg to the method
         """
-        return self._commandDict[command](*args)
+        try:
+            return self._commandDict[command](*args)
+        except SystemExit:
+            exit()
+        except:
+            # remove the latest command from the stack if the execution is incomplete
+            self._undoList.pop()
+            raise Exception
 
     def command(self, inputCommand):
         """command line input of text editor command
@@ -239,6 +324,9 @@ class TextEditor(object):
         """
         command = inputCommand.split()
         args = [None] if command[-1] == command[0] else command[1:]
+        if command[0] in self._undoable:
+            self._undoList.push([command[0]]) 
+            print(self._undoList)
         self.commandSelector(command[0], args)
     
     def main(self):
